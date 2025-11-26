@@ -19,17 +19,18 @@ def download_nltk_data():
     except Exception as e:
         print(f"⚠ NLTK download warning: {e}")
 
-# ------------------------------------------------------
-# LANGUAGE TOOL API (NO JAVA, ALWAYS WORKS)
-# ------------------------------------------------------
-LT_API_URL = "https://api.languagetool.org/v2/check"
 
+# ------------------------------------------------------
+# LOCAL LANGUAGE TOOL SERVER (OPEN-SOURCE + FREE)
+# Running in Docker on port 8081
+# ------------------------------------------------------
+LT_LOCAL_URL = "http://localhost:8081/v2/check"
 
 def lt_check(text):
-    """Send text to LanguageTool public API."""
+    """Send text to your local open-source LanguageTool server."""
     try:
         response = requests.post(
-            LT_API_URL,
+            LT_LOCAL_URL,
             data={
                 "text": text,
                 "language": "en-GB"
@@ -39,7 +40,7 @@ def lt_check(text):
         result = response.json()
         return result.get("matches", [])
     except Exception as e:
-        raise Exception(f"LanguageTool API Error: {str(e)}")
+        raise Exception(f"Local LT server error: {str(e)}")
 
 
 # ------------------------------------------------------
@@ -254,7 +255,8 @@ def analyze():
 def health():
     return jsonify({
         "status": "healthy",
-        "languagetool_api": True
+        "language_tool_running": True,
+        "lt_port": 8081
     }), 200
 
 
