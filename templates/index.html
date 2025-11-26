@@ -4,221 +4,680 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📝 IELTS Writing Band Score Checker</title>
-
     <style>
-        /* ---- SAME PREMIUM UI (no changes) ---- */
-        * {margin: 0; padding: 0; box-sizing: border-box;}
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            padding: 20px;
-            min-height: 100vh;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
         .container {
             max-width: 1400px;
-            margin: auto;
+            margin: 0 auto;
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
         }
+
         header {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 30px;
             text-align: center;
         }
-        header h1 {font-size: 2.5em; margin-bottom: 10px;}
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
         .content {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
             padding: 30px;
         }
-        .left-panel, .right-panel {padding: 20px;}
-        .left-panel {border-right: 2px solid #f0f0f0;}
-        h2 {color: #667eea; margin-bottom: 20px;}
-        textarea, input, select {
+
+        .left-panel, .right-panel {
+            padding: 20px;
+        }
+
+        .left-panel {
+            border-right: 2px solid #f0f0f0;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        select {
             width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 300px;
             padding: 15px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 1em;
-            margin-bottom: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             resize: vertical;
+            transition: border-color 0.3s;
         }
-        textarea:focus, input:focus, select:focus {
-            border-color: #667eea;
+
+        textarea:focus {
             outline: none;
+            border-color: #667eea;
         }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
         button {
+            flex: 1;
             padding: 15px 30px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
             font-size: 1.1em;
             font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
         }
+
         .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            width: 100%;
         }
-        .loading {text-align: center; padding: 20px; color: #667eea;}
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .note h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .note p, .note ul {
+            color: #856404;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .note ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        #results {
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.3em;
+            color: #667eea;
+        }
+
         .error-box {
             background: #fee;
             border-left: 4px solid #f44;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 5px;
             margin: 20px 0;
         }
-        #results {display: none;}
-    </style>
-</head>
 
-<body>
-<div class="container">
-
-    <header>
-        <h1>📝 IELTS Writing Band Score Checker</h1>
-        <p>Based on Authentic IELTS Band Descriptors</p>
-    </header>
-
-    <div class="content">
-
-        <!-- LEFT SIDE -->
-        <div class="left-panel">
-
-            <h2>✍️ Input Section</h2>
-
-            <!-- 🔥 NEW: Topic Input -->
-            <label>Task Topic / Question:</label>
-            <textarea id="topicText" placeholder="Paste your IELTS Task 1 or Task 2 question here..."></textarea>
-
-            <!-- Writing Task Type -->
-            <label>Task Type:</label>
-            <select id="taskType">
-                <option value="essay">Task 2 - Essay</option>
-                <option value="report">Task 1 - Academic Report</option>
-                <option value="letter">Task 1 - Letter</option>
-            </select>
-
-            <!-- Writing Box -->
-            <label>Your Writing:</label>
-            <textarea id="writingText" placeholder="Write your IELTS response here..." style="min-height: 300px;"></textarea>
-
-            <button class="btn-primary" onclick="analyzeWriting()">Analyze Writing</button>
-
-        </div>
-
-        <!-- RIGHT SIDE -->
-        <div class="right-panel">
-            <h2>📊 Analysis Results</h2>
-
-            <div id="results">
-                <p style="text-align:center;color:#999;padding:40px;">
-                    Results will appear here after analysis...
-                </p>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-
-<script>
-
-/* ============================================================
-   SAFE ANALYSIS FUNCTION — FULLY ERROR-PROOF
-   ============================================================ */
-async function analyzeWriting() {
-    const topic = document.getElementById('topicText').value.trim();
-    const text = document.getElementById('writingText').value.trim();
-    const taskType = document.getElementById('taskType').value;
-    const resultsDiv = document.getElementById('results');
-
-    if (!text) {
-        alert("⚠️ Please enter your writing first.");
-        return;
-    }
-
-    resultsDiv.style.display = "block";
-    resultsDiv.innerHTML = `
-        <div class="loading">🔄 Analyzing your writing... Please wait.</div>
-    `;
-
-    try {
-        const response = await fetch('/analyze', {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                topic: topic,    // 🔥 topic sent to backend (optional)
-                text: text,
-                task_type: taskType
-            })
-        });
-
-        const data = await response.json();
-
-        // Backend error → show error box, no crash
-        if (data.error) {
-            resultsDiv.innerHTML = `
-                <div class="error-box">
-                    <h3>❌ Error</h3>
-                    <p>${data.error}</p>
-                </div>`;
-            return;
+        .error-box h3 {
+            color: #c00;
+            margin-bottom: 10px;
         }
 
-        // Full display
-        displayResults(data);
+        .error-box p {
+            color: #c00;
+            margin-bottom: 10px;
+        }
 
-    } catch (err) {
-        resultsDiv.innerHTML = `
-            <div class="error-box">
-                <h3>❌ Connection Error</h3>
-                <p>${err.message}</p>
-            </div>`;
-    }
-}
+        .error-box ul {
+            color: #c00;
+            margin-left: 20px;
+            margin-top: 10px;
+        }
 
-/* ============================================================
-   RESULT DISPLAY FUNCTION — SAFE
-   ============================================================ */
-function displayResults(data) {
+        .error-box button {
+            margin-top: 15px;
+            background: #f44;
+            color: white;
+        }
 
-    const resultsDiv = document.getElementById("results");
+        .scores-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
 
-    resultsDiv.innerHTML = `
-        <div style="padding:20px;">
-            <h2>🎯 Overall Band: <span style="color:#667eea;">${data.scores.overall_band}</span></h2>
-            <p><strong>Task Achievement:</strong> ${data.scores.ta}</p>
-            <p><strong>Coherence & Cohesion:</strong> ${data.scores.cc}</p>
-            <p><strong>Lexical Resource:</strong> ${data.scores.lr}</p>
-            <p><strong>Grammar Range & Accuracy:</strong> ${data.scores.gra}</p>
+        .score-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
 
-            <hr><br>
+        .score-card.estimated {
+            background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
+        }
 
-            <h3>🧠 Most Common Words:</h3>
-            ${(data.lexical?.most_common || [])
-                .map(w => `<span style="padding:5px 10px;background:#667eea;color:white;border-radius:20px;margin-right:5px;">${w.word} (${w.count})</span>`)
-                .join("")}
+        .score-card h3 {
+            color: white;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
 
-            <hr><br>
+        .score {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
 
-            <h3>🔍 Grammar Errors: ${data.error_count}</h3>
-            ${data.errors.slice(0, 10).map(err => `
-                <div style="background:#f9f9f9;padding:10px;border-radius:6px;margin:10px 0;">
-                    <strong>${err.message}</strong><br>
-                    <small>${err.context}</small><br>
-                    <em style="color:#667eea;">${err.suggestions.join(", ")}</em>
+        .task-score {
+            background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .task-score h3 {
+            color: white;
+            font-size: 1.5em;
+        }
+
+        .stats-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .stats-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .errors-section {
+            margin: 20px 0;
+        }
+
+        .error-item {
+            background: #fff;
+            border-left: 4px solid #f44;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .error-message {
+            color: #c00;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .error-context {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+
+        .suggestions {
+            color: #667eea;
+            font-style: italic;
+        }
+
+        .feedback-section {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .feedback-section h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+
+        .feedback-item {
+            padding: 8px 0;
+            color: #1565c0;
+        }
+
+        .notes-section {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .notes-section p {
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .most-common-words {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .word-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .left-panel {
+                border-right: none;
+                border-bottom: 2px solid #f0f0f0;
+            }
+
+            .scores-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .scores-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📝 IELTS Writing Band Score Checker</h1>
+            <p>Analyze your writing and get instant band scores for Grammar (GRA) and Lexical Resource (LR)</p>
+        </header>
+
+        <div class="content">
+            <!-- LEFT PANEL: Input -->
+            <div class="left-panel">
+                <h2>✍️ Your Writing</h2>
+
+                <div class="form-group">
+                    <label for="taskType">Task Type:</label>
+                    <select id="taskType">
+                        <option value="essay">Task 2 - Essay (Opinion/Discussion)</option>
+                        <option value="report">Task 1 - Report (Graph/Chart/Diagram)</option>
+                        <option value="letter">Task 1 - Letter (Formal/Informal)</option>
+                    </select>
                 </div>
-            `).join("")}
+
+                <div class="form-group">
+                    <label for="writingText">Paste your text here:</label>
+                    <textarea id="writingText" placeholder="Enter your IELTS writing task here...
+
+Example:
+Many people believe that social media has had a negative impact on society. However, I partially disagree with this view because social media also brings several benefits to our daily lives.
+
+Firstly, social media platforms enable people to stay connected with friends and family regardless of geographical distance..."></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="analyzeWriting()">Analyze Writing</button>
+                    <button class="btn-secondary" onclick="clearForm()">Clear</button>
+                </div>
+
+                <div class="note">
+                    <h3>📌 Note:</h3>
+                    <p>This tool provides automated assessment for <strong>GRA (Grammar)</strong> and <strong>LR (Vocabulary)</strong>. TA/TR (Task Achievement) and CC (Coherence) are estimated only - they require human examiner assessment for accuracy.</p>
+                    <p style="margin-top: 10px;"><strong>IELTS Scoring:</strong> Each criterion is scored 0-9. The task score is the average of all 4 criteria. In the actual IELTS test, Task 2 is worth twice as much as Task 1 in calculating your overall writing band score.</p>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: Results -->
+            <div class="right-panel">
+                <h2>📊 Analysis Results</h2>
+                <div id="results">
+                    <p style="text-align: center; color: #999; padding: 40px;">
+                        Your analysis results will appear here after clicking "Analyze Writing"
+                    </p>
+                </div>
+            </div>
         </div>
-    `;
-}
+    </div>
 
-</script>
+    <script>
+        async function analyzeWriting() {
+            const text = document.getElementById('writingText').value.trim();
+            const taskType = document.getElementById('taskType').value;
+            const resultsDiv = document.getElementById('results');
+            
+            if (!text) {
+                alert('⚠️ Please enter some text to analyze.');
+                return;
+            }
 
+            if (text.split(/\s+/).length < 30) {
+                alert('⚠️ Please enter at least 30 words for meaningful analysis.');
+                return;
+            }
+            
+            // Show loading state
+            resultsDiv.innerHTML = '<div class="loading">🔄 Analyzing your writing...<br><small>This may take 10-30 seconds on first request</small></div>';
+            resultsDiv.style.display = 'block';
+            
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+                
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        task_type: taskType
+                    }),
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                // Check if response is OK
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // Parse JSON with error handling
+                let data;
+                try {
+                    const responseText = await response.text();
+                    data = JSON.parse(responseText);
+                } catch (jsonError) {
+                    console.error('JSON parse error:', jsonError);
+                    throw new Error('Server returned invalid response. The server might still be initializing. Please wait 30 seconds and try again.');
+                }
+                
+                // Check for error in response
+                if (data.error) {
+                    resultsDiv.innerHTML = `
+                        <div class="error-box">
+                            <h3>❌ Error</h3>
+                            <p>${data.error}</p>
+                            <p><small>Java available: ${data.java_available ? '✓ Yes' : '✗ No'}</small></p>
+                            <p><small>LanguageTool available: ${data.lt_tool_available ? '✓ Yes' : '✗ No'}</small></p>
+                            <button onclick="analyzeWriting()">🔄 Try Again</button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Display results
+                displayResults(data);
+                
+            } catch (error) {
+                console.error('Analysis error:', error);
+                
+                let errorMessage = error.message;
+                if (error.name === 'AbortError') {
+                    errorMessage = 'Request timed out. The server might be under heavy load.';
+                }
+                
+                resultsDiv.innerHTML = `
+                    <div class="error-box">
+                        <h3>❌ Connection Error</h3>
+                        <p>${errorMessage}</p>
+                        <p>This might be because:</p>
+                        <ul>
+                            <li>The server is still initializing (first request takes 30-60 seconds)</li>
+                            <li>Your internet connection is unstable</li>
+                            <li>The server is under heavy load</li>
+                        </ul>
+                        <button onclick="analyzeWriting()">🔄 Try Again</button>
+                    </div>
+                `;
+            }
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            
+            let errorsHTML = '';
+            if (data.errors && data.errors.length > 0) {
+                errorsHTML = `
+                    <div class="errors-section">
+                        <h3>🔍 Grammar & Spelling Issues (${data.error_count} found)</h3>
+                        ${data.errors.slice(0, 10).map(error => `
+                            <div class="error-item">
+                                <div class="error-message">${error.message}</div>
+                                <div class="error-context">${error.context}</div>
+                                ${error.suggestions.length > 0 ? `
+                                    <div class="suggestions">💡 Suggestions: ${error.suggestions.join(', ')}</div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                        ${data.errors.length > 10 ? `<p style="color: #999; text-align: center;">... and ${data.errors.length - 10} more issues</p>` : ''}
+                    </div>
+                `;
+            } else {
+                errorsHTML = `
+                    <div class="feedback-section">
+                        <h3>✅ Excellent!</h3>
+                        <p>No grammar or spelling errors detected!</p>
+                    </div>
+                `;
+            }
+
+            let mostCommonHTML = '';
+            if (data.lexical && data.lexical.most_common) {
+                mostCommonHTML = `
+                    <div class="most-common-words">
+                        ${data.lexical.most_common.map(item => `
+                            <span class="word-badge">${item.word} (${item.count})</span>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            resultsDiv.innerHTML = `
+                <div class="scores-grid">
+                    <div class="score-card">
+                        <h3>GRA</h3>
+                        <div class="score">${data.scores.gra}</div>
+                        <small>Grammar</small>
+                    </div>
+                    <div class="score-card">
+                        <h3>LR</h3>
+                        <div class="score">${data.scores.lr}</div>
+                        <small>Vocabulary</small>
+                    </div>
+                    <div class="score-card estimated">
+                        <h3>TA/TR</h3>
+                        <div class="score">${data.scores.ta}</div>
+                        <small>Task (Est.)</small>
+                    </div>
+                    <div class="score-card estimated">
+                        <h3>CC</h3>
+                        <div class="score">${data.scores.cc}</div>
+                        <small>Coherence (Est.)</small>
+                    </div>
+                </div>
+
+                <div class="task-score">
+                    <h3>📌 Task Score: ${data.scores.task_score}</h3>
+                    <small>Average of all 4 criteria</small>
+                </div>
+
+                ${errorsHTML}
+
+                <div class="stats-section">
+                    <h3>📈 Writing Statistics</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Words:</span>
+                        <span class="stat-value">${data.lexical.total_words}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Unique Words:</span>
+                        <span class="stat-value">${data.lexical.unique_words}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Lexical Diversity (TTR):</span>
+                        <span class="stat-value">${data.lexical.ttr}%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Error Density:</span>
+                        <span class="stat-value">${data.scores.error_density} errors/100 words</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Sentence Count:</span>
+                        <span class="stat-value">${data.structure.sentence_count}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Avg Sentence Length:</span>
+                        <span class="stat-value">${data.structure.avg_sentence_length} words</span>
+                    </div>
+                </div>
+
+                <div class="stats-section">
+                    <h3>🔤 Most Common Words</h3>
+                    ${mostCommonHTML}
+                </div>
+
+                <div class="feedback-section">
+                    <h3>💬 Feedback & Recommendations</h3>
+                    ${data.feedback.map(item => `
+                        <div class="feedback-item">${item}</div>
+                    `).join('')}
+                </div>
+
+                ${data.notes && data.notes.length > 0 ? `
+                    <div class="notes-section">
+                        ${data.notes.map(note => `<p>${note}</p>`).join('')}
+                    </div>
+                ` : ''}
+            `;
+            
+            resultsDiv.style.display = 'block';
+        }
+
+        function clearForm() {
+            document.getElementById('writingText').value = '';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('results').innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Your analysis results will appear here after clicking "Analyze Writing"</p>';
+        }
+
+        // Auto-resize textarea
+        document.getElementById('writingText').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.max(300, this.scrollHeight) + 'px';
+        });
+    </script>
 </body>
 </html>
