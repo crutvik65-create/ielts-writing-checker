@@ -24,5 +24,8 @@ COPY . .
 # Download NLTK data at build time
 RUN python -c "import nltk; nltk.download('punkt_tab', quiet=True); nltk.download('averaged_perceptron_tagger', quiet=True); nltk.download('stopwords', quiet=True)"
 
+# PRE-DOWNLOAD LANGUAGETOOL AT BUILD TIME (CRITICAL FIX)
+RUN python -c "import language_tool_python; lt = language_tool_python.LanguageTool('en-GB'); print('LanguageTool downloaded successfully')"
+
 # Start Gunicorn server (Render will provide $PORT automatically)
 CMD gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120 --workers 1
