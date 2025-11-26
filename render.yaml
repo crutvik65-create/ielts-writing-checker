@@ -2,10 +2,11 @@ services:
   - type: web
     name: ielts-writing-checker
     env: python
-    buildCommand: |
-      apt-get update && apt-get install -y default-jre
-      pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120
+    healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
         value: 3.13.4
