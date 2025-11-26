@@ -296,5 +296,5 @@ def health():
 
 if __name__ == '__main__':
     download_nltk_data()
-    port = int(os.environ.get('PORT', 3333))
+    port = int(os.environ.get('PORT', 20000))
     app.run(host='0.0.0.0', port=port, debug=False)
