@@ -4,8 +4,26 @@ import nltk
 import re
 from collections import Counter
 import os
+import subprocess
+import sys
 
 app = Flask(__name__)
+
+def check_java():
+    """Check if Java is available"""
+    try:
+        result = subprocess.run(['java', '-version'], 
+                              capture_output=True, 
+                              text=True, 
+                              timeout=5)
+        print("✓ Java is available")
+        return True
+    except FileNotFoundError:
+        print("✗ Java not found in PATH")
+        return False
+    except Exception as e:
+        print(f"✗ Java check failed: {e}")
+        return False
 
 # Download required NLTK data
 def download_nltk_data():
@@ -13,17 +31,26 @@ def download_nltk_data():
         nltk.download('punkt_tab', quiet=True)
         nltk.download('averaged_perceptron_tagger', quiet=True)
         nltk.download('stopwords', quiet=True)
-        print("NLTK resources downloaded successfully.")
+        print("✓ NLTK resources downloaded successfully.")
     except Exception as e:
-        print(f"Warning: Could not download NLTK resources: {e}")
+        print(f"⚠ Warning: Could not download NLTK resources: {e}")
 
-# Initialize LanguageTool
-try:
-    lt_tool = language_tool_python.LanguageTool('en-GB')
-    print("LanguageTool initialized successfully.")
-except Exception as e:
-    print(f"Error initializing LanguageTool: {e}")
-    lt_tool = None
+# Check Java availability
+java_available = check_java()
+
+# Initialize LanguageTool only if Java is available
+lt_tool = None
+if java_available:
+    try:
+        lt_tool = language_tool_python.LanguageTool('en-GB')
+        print("✓ LanguageTool initialized successfully.")
+    except Exception as e:
+        print(f"✗ Error initializing LanguageTool: {e}")
+        lt_tool = None
+else:
+    print("⚠ LanguageTool disabled: Java not available")
+    print("  Grammar checking will not work without Java.")
+    print("  Please install Java in your deployment environment.")
 
 def calculate_lexical_diversity(text):
     """Calculate lexical diversity metrics for vocabulary assessment."""
@@ -146,7 +173,10 @@ def calculate_overall_writing_score(task1_score, task2_score):
 def analyze_text(text, task_type):
     """Analyze text and provide detailed IELTS band score breakdown."""
     if not lt_tool:
-        return {"error": "LanguageTool not initialized. Please check server setup."}
+        return {
+            "error": "Grammar checking is unavailable. Java is required for LanguageTool but is not installed on this server. Please contact the administrator or try again later.",
+            "java_available": False
+        }
     
     # Grammar check
     matches = lt_tool.check(text)
@@ -238,7 +268,8 @@ def analyze_text(text, task_type):
             "These criteria require human assessment by trained IELTS examiners.",
             "Only GRA and LR scores are reliably assessed by this automated tool.",
             "The task score shown is calculated using estimated TA/CC values."
-        ]
+        ],
+        "java_available": True
     }
 
 @app.route('/')
@@ -257,6 +288,16 @@ def analyze():
     result = analyze_text(text, task_type)
     return jsonify(result)
 
+@app.route('/health')
+def health():
+    """Health check endpoint for Render"""
+    return jsonify({
+        "status": "healthy",
+        "java_available": java_available,
+        "languagetool_available": lt_tool is not None
+    }), 200
+
 if __name__ == '__main__':
     download_nltk_data()
-    app.run(host='0.0.0.0', port=3333, debug=True)
+    port = int(os.environ.get('PORT', 3333))
+    app.run(host='0.0.0.0', port=port, debug=False)
