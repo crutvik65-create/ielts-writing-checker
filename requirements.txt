@@ -1,0 +1,6 @@
+flask==3.0.6
+gunicorn==23.0.0
+language-tool-python==2.7.1
+nltk==3.9.1
+requests==2.32.3
+jdk4py
