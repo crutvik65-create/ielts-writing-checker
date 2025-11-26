@@ -4,9 +4,6 @@ services:
     env: python
     region: oregon
     plan: free
-    buildCommand: pip install -r requirements.txt
+    buildCommand: ./build.sh
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120
     healthCheckPath: /health
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.13.4
