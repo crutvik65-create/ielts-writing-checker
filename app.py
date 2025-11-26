@@ -8,18 +8,7 @@ import subprocess
 
 app = Flask(__name__)
 
-def check_java():
-    """Check if Java is available"""
-    try:
-        result = subprocess.run(['java', '-version'], 
-                              capture_output=True, 
-                              text=True, 
-                              timeout=5)
-        print("✓ Java is available")
-        return True
-    except Exception as e:
-        print(f"✗ Java check failed: {e}")
-        return False
+
 
 # Download required NLTK data
 def download_nltk_data():
@@ -32,25 +21,12 @@ def download_nltk_data():
         print(f"⚠ NLTK download warning: {e}")
 
 # Check Java availability
-java_available = check_java()
 
 # Initialize LanguageTool with better error handling
 lt_tool = None
 lt_initialization_error = None
 
-if java_available:
-    try:
-        print("🔄 Initializing LanguageTool (this may take 20-30 seconds on first run)...")
-        lt_tool = language_tool_python.LanguageTool('en-GB')
-        print("✓ LanguageTool initialized successfully")
-    except Exception as e:
-        error_msg = str(e)
-        print(f"✗ LanguageTool initialization failed: {error_msg}")
-        lt_initialization_error = error_msg
-        lt_tool = None
-else:
-    lt_initialization_error = "Java not available"
-    print("⚠ LanguageTool disabled: Java not available")
+
 
 def calculate_lexical_diversity(text):
     """Calculate lexical diversity metrics for vocabulary assessment."""
@@ -144,22 +120,7 @@ def calculate_task_score(ta_score, cc_score, lr_score, gra_score):
 def analyze_text(text, task_type):
     """Analyze text and provide detailed IELTS band score breakdown."""
     
-    # Check if LanguageTool is available
-    if not lt_tool:
-        error_message = "Grammar checking is currently unavailable. "
-        if lt_initialization_error:
-            if "Java not available" in lt_initialization_error:
-                error_message += "Java runtime is required but not found on this server."
-            else:
-                error_message += f"Initialization error: {lt_initialization_error}"
-        else:
-            error_message += "Please try again later or contact support."
-        
-        return {
-            "error": error_message,
-            "java_available": java_available,
-            "lt_tool_available": False
-        }
+   
     
     try:
         # Grammar check with timeout protection
@@ -243,7 +204,6 @@ def analyze_text(text, task_type):
                 "⚠️ TA and CC scores are ESTIMATES - they require human assessment.",
                 "Only GRA and LR scores are reliably assessed automatically."
             ],
-            "java_available": True,
             "lt_tool_available": True
         }
     
@@ -251,7 +211,6 @@ def analyze_text(text, task_type):
         # Catch any runtime errors during analysis
         return {
             "error": f"Analysis failed: {str(e)}",
-            "java_available": java_available,
             "lt_tool_available": False
         }
 
@@ -280,7 +239,6 @@ def analyze():
         # Always return valid JSON even on error
         return jsonify({
             "error": f"Server error: {str(e)}",
-            "java_available": java_available,
             "lt_tool_available": lt_tool is not None
         }), 500
 
@@ -289,12 +247,11 @@ def health():
     """Health check endpoint for Render"""
     return jsonify({
         "status": "healthy",
-        "java_available": java_available,
         "languagetool_available": lt_tool is not None,
         "languagetool_error": lt_initialization_error
     }), 200
 
 if __name__ == '__main__':
     download_nltk_data()
-    port = int(os.environ.get('PORT', 20000))
+    port = int(os.environ.get('PORT', 10000))
     app.run(host='0.0.0.0', port=port, debug=False)
